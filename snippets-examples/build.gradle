@@ -1,0 +1,12 @@
+apply plugin: 'java-library'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation project(':snippets-core')
+	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    testImplementation 'junit:junit:4.10'
+}
+
