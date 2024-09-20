@@ -13,7 +13,7 @@ import snippets.Snippet;
 import snippets.matcher.Matcher;
 import snippets.matcher.parts.Cancellable;
 import snippets.matcher.parts.Reaction;
-import snippets.threads.Threads;
+import static snippets.threads.Threads.*;
 
 public class OperationProgress extends JPanel implements Reaction, Cancellable {
 	public static final String CANCEL_SEARCH = "cancel_job";
@@ -38,16 +38,19 @@ public class OperationProgress extends JPanel implements Reaction, Cancellable {
 		cont.add(cancel);
 		this.add(cont);
 	}
+	
+	private void update(Matcher s) { //, Object in, Object out, Reaction react, Cancellable cancel) {
+		jstatus.setValue((Integer)s.in());
+	}
 
-	private final Snippet update = new Snippet(Threads.THREAD_UIABLE) {
-		@Override public void todo(Matcher s) {
-			jstatus.setValue((Integer)s.in());
-		}};
 	
 	@Override public void progress(String id, float progress) {
 		//Swing support concurrent-thread changes UI, but Android throws Exception
 		//Lets use launch(Snippet for UI-threads), to write universal-code.
-		Threads.launch((int)(100*progress), null, update);
+		launchUI(this::update, (int)(100*progress));
+		
+		//launch(THREAD_UIABLE, (int)(100*progress), null, null, null, this::update);
+	
 	}
 	//Ignoring - just send to Bus Main
 	@Override public void error(String id, String etag, Object packet) { bus.error(id, etag, packet);}
@@ -63,6 +66,7 @@ public class OperationProgress extends JPanel implements Reaction, Cancellable {
 		cancel.setEnabled(false);
 		jstatus.setValue(100);
 	}
+	
 	//Working with one JOB - ignoring JOB_UID
 	@Override public boolean doing(String juid) { return isLife; }
 	@Override public void cancel(String juid, boolean lifeState) { isLife = !lifeState; }

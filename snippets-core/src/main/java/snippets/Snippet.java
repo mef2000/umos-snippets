@@ -1,17 +1,18 @@
 package snippets;
 
 import snippets.matcher.Matcher;
+import snippets.matcher.parts.Cancellable;
+import snippets.matcher.parts.Reaction;
 
-public abstract class Snippet implements Runnable {
-	protected Matcher internal = null;
-	public String TARGET_POLICY = null;
-	public Snippet(String target_policy) {
-		TARGET_POLICY = target_policy;
-		if(TARGET_POLICY == null) throw new RuntimeException("[Snippets] ThreadPolicy must be real-object.");
-	}
-	@Override public void run() {
-		todo(internal);
-	}
-	public abstract void todo(Matcher s);
-	public void match(Matcher direct) { this.internal = direct; }
+@FunctionalInterface
+public interface Snippet extends Runnable {
+	public void work(Matcher iorc);//, Object in, Object out, Reaction r, Cancellable cancel);//Object in, Object out, Reaction r, Cancellable cancel);
+	
+	public default Matcher extract() { return null; }
+	
+	@Override public default void run() {
+		if(extract()==null) throw new RuntimeException("[Snippet] Wrong self-calling Snippet by run(), 'Matcher' isn't real object (NullPointer). You @Override extract()-function?");
+		Matcher m = extract();
+		work(m);//, m.in(), m.out(), m.reaction(), m.cancelation());//m.in(), m.out(), m.reaction(), m.cancelation());
+	} 
 }

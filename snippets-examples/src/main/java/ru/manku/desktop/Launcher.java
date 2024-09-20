@@ -10,6 +10,9 @@ import snippets.threads.defaults.DefaultManager;
 
 public class Launcher {
 	public static final String ROOT = System.getProperty("user.home").concat("/Coub Alter Player/");
+	public static void checker(Object... vals) {
+		System.out.println(vals.length);
+	}
 	public static void main(String[] args) {
 		new File(ROOT.concat(".cache/")).mkdirs();
 		new File(ROOT.concat("exported/")).mkdirs();
@@ -19,12 +22,13 @@ public class Launcher {
 		final SwingJob runUI = new SwingJob() {
 			@Override public Job register(Job job) {
 				//Please, prepare Snippet IORC-state by calling match(...) before raw calling!
-				job.function.match(job);
+				// @Deprecated job.function.match(job);
 				SwingUtilities.invokeLater(job.function); 
 				return job;
 			}
 		};
 		final DefaultManager defman = new DefaultManager(runUI);
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override public void run() {
 				new Bus(defman);

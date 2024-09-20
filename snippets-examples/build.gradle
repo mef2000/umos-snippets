@@ -1,9 +1,14 @@
 apply plugin: 'java-library'
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
 dependencies {
     implementation project(':snippets-core')
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'

@@ -2,6 +2,77 @@
 For English README access click ["English section"](#readme-english-section)
 ## Что такое umOS::Snippets?
 umOS::Snippets - небольшая библиотека поддержки ассинхронного кода в Java проектах с целевым JRE 8 и выше, а также Android OS. Основное назначение - упростить ассинхронное выполенение кода и контроль за ним, через описание сниппетов - концепцию изолированных фрагментов кода. Создана для личного пользования в некоторых проектах. Возможно кому-нибудь поможет.
+
+# Новвоведения от 2024/09/20
+Промежуточное обновление кодовой базы umOS::Snippets.
+```
+* Использование Java JRE 8 и выше
+* Интеграция Methods Reference, Lambdas в launch*(...)
+* [BCHANGES] Изменение в определении Snippet - теперь это функциональный интерфейс
+* [BCHANGES] Изменение в семействе функций Threads.launch*(...), теперь необходимо явно указывать политику потока для запуска сниппета
+* Изменение в Example - для совместимости с новыми возможностями
+```
+
+Таким образом, промежуточное обновление затрагивает объявление сниппета, а также функцию запуска данных сниппетов. Теперь есть возможность использовать лямбда-выражения и ссылки на методы.
+
+Раньше:
+```
+Snippet todo_smth = new Snippet({TARGET_POLICY}) {
+		@Override public void todo(Matcher m) {
+			//Write your async code here
+	}
+};
+```
+
+Сейчас:
+```
+Snippet todo_smth = new Snippet() {
+		@Override public void todo(Matcher m) {
+			//Write your isolated code here
+	}
+};
+
+ИЛИ
+
+Snippet todo_smth = (m) -> { 
+	//Write your isolated code here
+};
+
+ИЛИ
+
+launch({THREAD_POLICY}, this::methodAsTypeSnippet, ...);
+
+ИЛИ
+
+launch*(this_or_static_class::methodAsTypeSnippet, ...);
+
+```
+
+Теперь Threads.launch*() может принимать различные аргументы IORC-профиля. Это означает что необходимо лишь соблюдать последовательность объектов IORC, например,  сперва идет входные данные, потом если не нужны выходные данные, то можно передавать лаунчеру Reaction и Cancellable (опционально).
+
+Так же были интегрированы следующие функции запуска, чтобы сократить команду запуска:
+```
+launchNow(snippet, ... iorc) - запустить сниппет в доступном Intantable-провайдере
+
+launchUI(snippet, ... iorc) - запустить сниппет в доступном UI-провайдере
+
+launchStack(snippet, ... iorc) - запустить сниппет в доступном Stack-провайдере
+```
+
+### Поддерживаемые варианты последовательности IORC-профиля
+Допустим вы вызываете launch()/launchNow()/launchUI()/launchStack() передавая сниппет и некоторую последовательность IORC-профиля, в следующей таблице указаны соответсвие числу аргументов после сниппета и поддерживаемый такому числу вариант IORC-профиля:
+
+|Число аргументов|Возможные варианты IORC - последовательности |
+|-|-|
+|Snippet+null| throws RuntimeException|
+|Snippet+0 (only snippet)| исполнение данного сниппета, передаваемый IORC-профиль из провайдера потока|
+|Snipept+1|Или I(input) объект данных или Reaction, остальное - представление провайдером потока|
+|Snipept+2|Возможные вариации профилей RC, IR, IO, остальные данные - провайдером потока|
+|Snipept+3|Возможные вариации профилей IRC, IOR, остальные данные - провайдером потока|
+|Snipept+4|Полноценный IORC-профиль, представленный вами|
+
+
+# README для PB20240726/1G0
 ## Основные объекты
 При  работе с библиотекой требуется изучить следующие объекты.
 ### Threads - лаунчер сниппетов
@@ -90,8 +161,55 @@ Threads.launch(your_snippet);
 
 ## Примеры кода
 В папке snippet-examples приводится пример решения асинхронных задач с использованием сниппетов. Приложение реализует загрузку коубов с сайта coub.com (предоставлено исключительно в учебных целях). Так же вы можете найти там пример элементарного провайдера для политики THREAD_UIABLE (класс ru.manku.desktop.SwingJob), регистрацию и сопровождение жизненного цикла Threads. Для корректной работы примера потребуется бинарный исполняемый файл ffmpeg-библиотеки.
+
+
 # README: English section
 Translated by Google Translate
+
+# New changes from 2024/09/20
+Interim update of the umOS codebase::Snippets.
+```
+* Using Java JRE 8 and above
+* Integration of Methods Reference, Lambdas into launch*(...)
+* [BCHANGES] Change in the definition of Snippet - now it is a functional interface
+* [BCHANGES] A change in the Threads.launch*(...) family of functions, it is now necessary to explicitly specify the thread policy for launching the snippet
+* Change in Example - for compatibility with new features
+```
+
+Thus, the interim update affects the announcement of the snippet, as well as the function of launching these snippets. Now it is possible to use lambda expressions and method references.
+
+Before:
+```
+Snippet todo_smth = new Snippet({TARGET_POLICY}) {
+	@Override public void todo(Matcher m) {
+		//Write your async code here
+	}
+};
+```
+
+Now:
+```
+Snippet todo_smth = new Snippet() {
+	@Override public void todo(Matcher m) { 
+		//Write your isolated code here
+	}
+};
+
+OR 
+
+Snippet todo_smth = (m) -> { //Write your isolated code here };
+
+OR
+
+launch({THREAD_POLICY}, this::methodAsTypeSnippet, ...);
+
+OR
+
+launch*(this_or_static_class::methodAsTypeSnippet, ...);
+```
+
+ 
+# README for PB20240726/1G0
 ## What are umOS::Snippets?
 umOS::Snippets is a small library for supporting asynchronous code in Java projects with a target JRE 8 and higher, as well as Android OS. The main purpose is temporary asynchronous execution of code and control over it, through the description of snippets - the inclusion of isolated code fragments. Created for personal use in some projects. Perhaps it will help someone.
 ## Main objects

@@ -21,7 +21,8 @@ public class StackableJob extends ThreadProvider implements Runnable {
 				else for(Map.Entry<String, Job> j : jobs.entrySet()) {
 					if(STATE == Threads.STATE_SLEEP) break;
 					else {
-						j.getValue().function.todo(j.getValue());
+						Job job = j.getValue();
+						j.getValue().function.work(job);//, job.in(), job.out(), job.reaction(), job.cancelation());
 						jobs.remove(j.getKey());
 					}
 				}
